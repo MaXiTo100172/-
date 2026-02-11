@@ -1,0 +1,153 @@
+</html><!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Hungry Cat Deluxe 🐱</title>
+<style>
+body {
+  margin: 0;
+  overflow: hidden;
+  font-family: Arial;
+  /* Фон с твоей фотографией */
+  background: url("");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Облака */
+.cloud {margin: 0;
+
+  position: absolute;
+  font-size: 50px;
+  animation: float 20s linear infinite;
+}
+
+@keyframes float {
+  from { transform: translateX(-100px); }
+  to { transform: translateX(110vw); }
+}
+
+#cat {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  font-size: 90px;   /* размер котика */
+  transform: translateX(-50%);
+}
+
+.treat {
+  position: absolute;
+  font-size: 50px;   /* размер вкусняшек/бомб */
+}
+
+#ui {
+  position: absolute;
+  top: 15px;
+  left: 15px;
+  font-size: 26px;
+  background: rgba(255,255,255,0.7);
+  padding: 8px 15px;
+  border-radius: 15px;
+}
+</style>
+</head>
+<body>
+
+<!-- Облака -->
+<div class="cloud" style="top:50px;">☁️</div>
+<div class="cloud" style="top:120px; animation-delay:5s;">☁️</div>
+<div class="cloud" style="top:200px; animation-delay:10s;">☁️</div>
+
+<!-- UI -->
+<div id="ui">
+  Score: <span id="score">0</span> |
+  Time: <span id="time">30</span>
+</div>
+
+<!-- Кот -->
+<div id="cat">🐱</div>
+
+<script>
+let cat = document.getElementById("cat");
+let score = 0;
+let time = 60;  // Сколько секунд длится игра
+
+let treats = ["🐟","🥛","🍗","🍩","🧁"];
+let bomb = "💣";
+
+// Движение котика за мышью/пальцем
+document.addEventListener("mousemove", (e) => {
+  cat.style.left = e.clientX + "px";
+});
+document.addEventListener("touchmove", (e) => {
+  cat.style.left = e.touches[0].clientX + "px";
+});
+
+// Создаём предметы (вкусняшки и бомбы)
+function createItem() {
+  if (time <= 0) return;
+
+  let item = document.createElement("div");
+  item.classList.add("treat");
+
+  // 35% шанс бомбы
+  if (Math.random() < 0.2) {
+    item.innerHTML = bomb;
+    item.dataset.type = "bomb";
+  } else {
+    item.innerHTML = treats[Math.floor(Math.random()*treats.length)];
+    item.dataset.type = "treat";
+  }
+
+  item.style.left = Math.random() * window.innerWidth + "px";
+  item.style.top = "0px";
+  document.body.appendChild(item);
+
+  let fall = setInterval(() => {
+    item.style.top = item.offsetTop + 7 + "px";
+
+    if (item.offsetTop > window.innerHeight) {
+      item.remove();
+      clearInterval(fall);
+    }
+
+    let catRect = cat.getBoundingClientRect();
+    let itemRect = item.getBoundingClientRect();
+
+    // Проверка на столкновение
+    if (
+      itemRect.bottom > catRect.top &&
+      itemRect.left < catRect.right &&
+      itemRect.right > catRect.left
+    ) {
+      if (item.dataset.type === "bomb") {
+        score -= 2;  // бомба отнимает очки
+        if (score < 0) score = 0;
+      } else {
+        score += 1;
+      }
+
+      document.getElementById("score").innerText = score;
+      item.remove();
+      clearInterval(fall);
+    }
+  }, 20);
+}
+
+// Создаём предметы каждые 0.1 секунды
+setInterval(createItem, 300);
+
+// Таймер
+let timer = setInterval(() => {
+  time--;
+  document.getElementById("time").innerText = time;
+  if (time <= 0) {
+    clearInterval(timer);
+    alert("Game Over! 🐾 Your score: " + score);
+  }
+}, 1000);
+</script>
+
+</body>
+</html>
